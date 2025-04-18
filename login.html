@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlayMyBeat - Canciones</title>
+    <title>PlayMyBeat - Iniciar Sesión</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -28,15 +28,19 @@
             font-size: 16px;
         }
     </style>
+    <!-- Firebase App (core) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
 </head>
 
 <body>
-    <h1>🎵 Canciones Sugeridas</h1>
-
-    <button id="logoutButton">Cerrar sesión</button>
+    <h1>🎵 Bienvenido a PlayMyBeat</h1>
+    <p>Por favor, inicie sesión con Google para continuar.</p>
+    <button id="loginButton">Iniciar sesión con Google</button>
 
     <script>
-        // Configuración de Firebase
+        // Configuración de Firebase (reemplaza con la tuya)
         const firebaseConfig = {
             apiKey: "AIzaSyCT372VK2yOnSyQ3X2hYN6FBy5zKMaZ3BQ",
             authDomain: "playmebeat.firebaseapp.com",
@@ -52,17 +56,28 @@
         const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
 
-        // Botón de logout
-        const logoutButton = document.getElementById('logoutButton');
+        // Botón de login
+        const loginButton = document.getElementById('loginButton');
 
-        // Función para cerrar sesión
-        logoutButton.addEventListener('click', () => {
-            auth.signOut().then(() => {
-                // Redirigir a la página de login después de cerrar sesión
-                window.location.href = "login.html";
-            }).catch((error) => {
-                console.log(error.message);
-            });
+        // Función para iniciar sesión con Google
+        loginButton.addEventListener('click', () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    // Usuario ha iniciado sesión, redirigir a la página principal
+                    window.location.href = "index.html";
+                })
+                .catch((error) => {
+                    console.log(error.message);
+                });
+        });
+
+        // Comprobar si el usuario ya está autenticado
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // Si ya está autenticado, redirigir directamente a index
+                window.location.href = "index.html";
+            }
         });
     </script>
 </body>
