@@ -27,6 +27,12 @@
             cursor: pointer;
             font-size: 16px;
         }
+
+        #authText {
+            margin: 20px 0;
+            font-size: 18px;
+            color: #FF0000;
+        }
     </style>
     <!-- Firebase App (core) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
@@ -51,32 +57,57 @@
 
         // Comprobar si el usuario está autenticado
         auth.onAuthStateChanged((user) => {
-            if (!user) {
-                // Si no está autenticado, redirigir a login
-                window.location.href = "login.html";
+            if (user) {
+                // Si ya está autenticado, mostrar el contenido principal y ocultar el texto y el botón de login
+                document.getElementById('authText').style.display = 'none';
+                document.getElementById('loginButton').style.display = 'none';
+                document.getElementById('logoutButton').style.display = 'block';
+            } else {
+                // Si no está autenticado, mostrar el texto y el botón de login
+                document.getElementById('authText').style.display = 'block';
+                document.getElementById('loginButton').style.display = 'block';
+                document.getElementById('logoutButton').style.display = 'none';
             }
         });
+
+        // Función para iniciar sesión con Google
+        function login() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    // Usuario ha iniciado sesión
+                    console.log('Usuario autenticado: ', result.user);
+                })
+                .catch((error) => {
+                    console.log(error.message);
+                });
+        }
+
+        // Función para cerrar sesión
+        function logout() {
+            auth.signOut().then(() => {
+                console.log('Usuario desconectado');
+            }).catch((error) => {
+                console.log(error.message);
+            });
+        }
     </script>
 </head>
 
 <body>
     <h1>🎵 Canciones Sugeridas</h1>
 
-    <button id="logoutButton">Cerrar sesión</button>
+    <!-- Texto que indica que hay que autenticarse -->
+    <p id="authText">Para usar la web, debes iniciar sesión con Google.</p>
+
+    <!-- Botón de login, visible solo si el usuario no está autenticado -->
+    <button id="loginButton" onclick="login()">Iniciar sesión con Google</button>
+
+    <!-- Botón de logout, visible solo si el usuario está autenticado -->
+    <button id="logoutButton" onclick="logout()" style="display: none;">Cerrar sesión</button>
 
     <script>
-        // Botón de logout
-        const logoutButton = document.getElementById('logoutButton');
-
-        // Función para cerrar sesión
-        logoutButton.addEventListener('click', () => {
-            auth.signOut().then(() => {
-                // Redirigir a la página de login después de cerrar sesión
-                window.location.href = "login.html";
-            }).catch((error) => {
-                console.log(error.message);
-            });
-        });
+        // Aquí podrías agregar más lógica para mostrar las canciones o cualquier otro contenido
     </script>
 </body>
 
