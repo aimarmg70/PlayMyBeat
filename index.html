@@ -53,12 +53,18 @@
     }
 
     #formulario {
-      display: none; /* oculto por defecto */
+      display: none;
       margin-top: 20px;
+    }
+
+    #mensajeAutenticacion {
+      margin-top: 20px;
+      font-style: italic;
+      color: #cccccc;
     }
   </style>
 
-  <!-- Firebase -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
@@ -66,7 +72,9 @@
 <body>
   <h1>🎵 Canciones Sugeridas</h1>
 
-  <button id="logoutButton">Cerrar sesión</button>
+  <button id="logoutButton" style="display:none;">Cerrar sesión</button>
+
+  <div id="mensajeAutenticacion">Inicia sesión para poder añadir canciones.</div>
 
   <div id="formulario">
     <input type="text" id="cancionInput" placeholder="Escribe una canción" />
@@ -81,6 +89,8 @@
       authDomain: "playmebeat.firebaseapp.com",
       databaseURL: "https://playmebeat-default-rtdb.europe-west1.firebasedatabase.app",
       projectId: "playmebeat",
+      storageBucket: "playmebeat.appspot.com",
+      messagingSenderId: "1041226968074",
       appId: "1:1041226968074:web:feb6cce1653b215efa03f3"
     };
 
@@ -91,20 +101,26 @@
     const logoutButton = document.getElementById("logoutButton");
     const formulario = document.getElementById("formulario");
     const listaCanciones = document.getElementById("listaCanciones");
+    const mensaje = document.getElementById("mensajeAutenticacion");
 
     auth.onAuthStateChanged((user) => {
-      if (!user) {
-        window.location.href = "login.html";
-      } else {
-        // Mostrar el formulario solo si el usuario está autenticado
+      if (user) {
+        // Mostrar formulario y botón de logout
         formulario.style.display = "block";
+        logoutButton.style.display = "inline-block";
+        mensaje.style.display = "none";
         cargarCanciones();
+      } else {
+        // Mostrar mensaje y ocultar formulario
+        formulario.style.display = "none";
+        logoutButton.style.display = "none";
+        mensaje.style.display = "block";
       }
     });
 
     logoutButton.addEventListener("click", () => {
       auth.signOut().then(() => {
-        window.location.href = "login.html";
+        location.reload();
       });
     });
 
