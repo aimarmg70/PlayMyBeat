@@ -57,32 +57,31 @@
       font-style: italic;
       color: red;
     }
+
+    #mensajeBienvenida {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #6CFFB8;
+    }
   </style>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-</head>
-<body>
-  <!-- Elementos iniciales -->
-  <div>
-    <input type="text" id="cancionInput" placeholder="Escribe una canción" disabled />
-    <button onclick="agregarCancion()" disabled>Añadir Canción</button>
-  </div>
+  <!-- Firebase SDK (modular) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import {
+      getDatabase,
+      ref,
+      push,
+      onValue
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
-  <div>
-    <button id="loginButton">Iniciar sesión</button>
-    <button id="logoutButton" disabled>Cerrar sesión</button>
-  </div>
-
-  <div id="mensajeAutenticacion">Inicia sesión para poder añadir canciones.</div>
-
-  <!-- Título y lista de canciones -->
-  <ul id="listaCanciones"></ul>
-  <h1>🎵 Canciones Sugeridas</h1>
-
-  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCT372VK2yOnSyQ3X2hYN6FBy5zKMaZ3BQ",
       authDomain: "playmebeat.firebaseapp.com",
@@ -93,19 +92,20 @@
       appId: "1:1041226968074:web:feb6cce1653b215efa03f3"
     };
 
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
     const loginButton = document.getElementById("loginButton");
     const logoutButton = document.getElementById("logoutButton");
     const input = document.getElementById("cancionInput");
     const mensaje = document.getElementById("mensajeAutenticacion");
+    const mensajeBienvenida = document.getElementById("mensajeBienvenida");
     const listaCanciones = document.getElementById("listaCanciones");
+    const addButton = document.getElementById("addButton");
 
     let usuarioAutenticado = null;
 
-    // 👉 Deshabilita todo al inicio excepto el botón de login
     function deshabilitarInterfaz() {
       const botones = document.querySelectorAll("button");
       const inputs = document.querySelectorAll("input, textarea, select");
@@ -117,58 +117,65 @@
       inputs.forEach((el) => el.disabled = true);
     }
 
-    // Se ejecuta al cargar la página
+    function habilitarInterfaz() {
+      input.disabled = false;
+      addButton.disabled = false;
+      logoutButton.disabled = false;
+    }
+
     window.onload = deshabilitarInterfaz;
 
-    auth.onAuthStateChanged((user) => {
+    onAuthStateChanged(auth, (user) => {
       usuarioAutenticado = user;
       if (user) {
+        const nombre = user.displayName || "usuario";
         mensaje.style.display = "none";
+        mensajeBienvenida.textContent = `👋 Bienvenido, ${nombre}`;
+        mensajeBienvenida.style.display = "block";
         loginButton.style.display = "none";
         logoutButton.style.display = "inline-block";
-        logoutButton.disabled = false;
-        input.disabled = false;
-        document.querySelector('button[onclick="agregarCancion()"]').disabled = false;
+
+        habilitarInterfaz();
         cargarCanciones();
       } else {
         mensaje.style.display = "block";
+        mensajeBienvenida.style.display = "none";
         loginButton.style.display = "inline-block";
         logoutButton.style.display = "none";
-        logoutButton.disabled = true;
-        input.disabled = true;
-        document.querySelector('button[onclick="agregarCancion()"]').disabled = true;
+
+        deshabilitarInterfaz();
         listaCanciones.innerHTML = "";
-        deshabilitarInterfaz(); // aseguramos estado correcto
       }
     });
 
     loginButton.addEventListener("click", () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).catch((error) => {
+      const provider = new GoogleAuthProvider();
+      signInWithPopup(auth, provider).catch((error) => {
         console.error("Error al iniciar sesión:", error.message);
       });
     });
 
     logoutButton.addEventListener("click", () => {
-      auth.signOut().catch((error) => {
+      signOut(auth).catch((error) => {
         console.error("Error al cerrar sesión:", error.message);
       });
     });
 
-    function agregarCancion() {
+    window.agregarCancion = function () {
       const nuevaCancion = input.value.trim();
       if (!usuarioAutenticado) {
         alert("Debes iniciar sesión para añadir canciones.");
         return;
       }
       if (nuevaCancion !== "") {
-        db.ref("canciones").push({ nombre: nuevaCancion });
+        push(ref(db, "canciones"), { nombre: nuevaCancion });
         input.value = "";
       }
-    }
+    };
 
     function cargarCanciones() {
-      db.ref("canciones").on("value", (snapshot) => {
+      const cancionesRef = ref(db, "canciones");
+      onValue(cancionesRef, (snapshot) => {
         listaCanciones.innerHTML = "";
         snapshot.forEach((child) => {
           const nombre = child.val().nombre;
@@ -179,5 +186,26 @@
       });
     }
   </script>
+</head>
+<body>
+  <!-- Entrada de canción -->
+  <div>
+    <input type="text" id="cancionInput" placeholder="Escribe una canción" disabled />
+    <button id="addButton" onclick="agregarCancion()" disabled>Añadir Canción</button>
+  </div>
+
+  <!-- Botones de autenticación -->
+  <div>
+    <button id="loginButton">Iniciar sesión</button>
+    <button id="logoutButton" disabled style="display:none">Cerrar sesión</button>
+  </div>
+
+  <!-- Mensajes -->
+  <div id="mensajeAutenticacion">Inicia sesión para poder añadir canciones.</div>
+  <div id="mensajeBienvenida" style="display: none;"></div>
+
+  <!-- Lista -->
+  <ul id="listaCanciones"></ul>
+  <h1>🎵 Canciones Sugeridas</h1>
 </body>
 </html>
