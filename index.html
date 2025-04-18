@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PlayMyBeat - Canciones</title>
   <style>
     body {
@@ -29,28 +28,58 @@
       margin: 10px;
     }
 
-    #authText {
-      margin: 20px 0;
-      font-size: 18px;
-      color: #FF8080;
+    #formulario, #logoutButton {
+      display: none;
+      margin-top: 20px;
+    }
+
+    input {
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+      margin-right: 10px;
+      width: 60%;
+      max-width: 300px;
+    }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+
+    li {
+      background-color: #1A1F3C;
+      margin: 8px auto;
+      padding: 10px;
+      border-radius: 8px;
+      width: 80%;
+      max-width: 400px;
     }
   </style>
 
-  <!-- Firebase compat (para usar auth con sintaxis antigua) -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 </head>
 
 <body>
   <h1>🎵 Canciones Sugeridas</h1>
 
-  <p id="authText">Para usar la web, debes iniciar sesión con Google.</p>
+  <p id="authMessage">Por favor, inicia sesión con Google para añadir canciones.</p>
 
   <button id="loginButton">Iniciar sesión con Google</button>
-  <button id="logoutButton" style="display: none;">Cerrar sesión</button>
+  <button id="logoutButton">Cerrar sesión</button>
+
+  <div id="formulario">
+    <input type="text" id="cancionInput" placeholder="Escribe una canción" />
+    <button onclick="agregarCancion()">Agregar Canción</button>
+  </div>
+
+  <ul id="listaCanciones"></ul>
 
   <script>
-    // Configuración Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCT372VK2yOnSyQ3X2hYN6FBy5zKMaZ3BQ",
       authDomain: "playmebeat.firebaseapp.com",
@@ -62,50 +91,64 @@
       measurementId: "G-H8YHSXVGLB"
     };
 
-    // Inicializar Firebase
-    firebase.initializeApp(firebaseConfig);
+    const app = firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
+    const db = firebase.database();
 
     const loginButton = document.getElementById('loginButton');
     const logoutButton = document.getElementById('logoutButton');
-    const authText = document.getElementById('authText');
+    const authMessage = document.getElementById('authMessage');
+    const formulario = document.getElementById('formulario');
+    const listaCanciones = document.getElementById('listaCanciones');
 
-    // Login con Google
     loginButton.addEventListener('click', () => {
       const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider)
-        .then((result) => {
-          console.log("Sesión iniciada con:", result.user.displayName);
-        })
-        .catch((error) => {
-          console.error("Error en login:", error.message);
-        });
+      auth.signInWithPopup(provider).catch((error) => {
+        console.error("Error al iniciar sesión:", error);
+      });
     });
 
-    // Logout
     logoutButton.addEventListener('click', () => {
-      auth.signOut()
-        .then(() => {
-          console.log("Sesión cerrada");
-        })
-        .catch((error) => {
-          console.error("Error al cerrar sesión:", error.message);
-        });
+      auth.signOut();
     });
 
-    // Escuchar cambios de sesión
     auth.onAuthStateChanged((user) => {
       if (user) {
         loginButton.style.display = "none";
         logoutButton.style.display = "inline-block";
-        authText.style.display = "none";
+        authMessage.style.display = "none";
+        formulario.style.display = "block";
+        cargarCanciones();
       } else {
         loginButton.style.display = "inline-block";
         logoutButton.style.display = "none";
-        authText.style.display = "block";
+        authMessage.style.display = "block";
+        formulario.style.display = "none";
+        listaCanciones.innerHTML = "";
       }
     });
+
+    function agregarCancion() {
+      const input = document.getElementById('cancionInput');
+      const nuevaCancion = input.value.trim();
+      if (nuevaCancion !== "") {
+        const nuevaRef = db.ref("canciones").push();
+        nuevaRef.set({ nombre: nuevaCancion });
+        input.value = "";
+      }
+    }
+
+    function cargarCanciones() {
+      db.ref("canciones").on("value", (snapshot) => {
+        listaCanciones.innerHTML = "";
+        snapshot.forEach((childSnapshot) => {
+          const nombre = childSnapshot.val().nombre;
+          const li = document.createElement("li");
+          li.textContent = nombre;
+          listaCanciones.appendChild(li);
+        });
+      });
+    }
   </script>
 </body>
-
 </html>
