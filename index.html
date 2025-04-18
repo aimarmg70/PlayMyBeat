@@ -55,7 +55,7 @@
     #mensajeAutenticacion {
       margin-top: 20px;
       font-style: italic;
-      color: #cccccc;
+      color: red; /* Cambié a rojo */
     }
   </style>
 
@@ -65,21 +65,22 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 </head>
 <body>
-  <h1>🎵 Canciones Sugeridas</h1>
-
+  <!-- Elementos iniciales -->
   <div>
-    <input type="text" id="cancionInput" placeholder="Escribe una canción" />
-    <button onclick="agregarCancion()">Agregar Canción</button>
+    <input type="text" id="cancionInput" placeholder="Escribe una canción" disabled />
+    <button onclick="agregarCancion()" disabled>Añadir Canción</button>
   </div>
 
   <div>
     <button id="loginButton">Iniciar sesión</button>
-    <button id="logoutButton">Cerrar sesión</button>
+    <button id="logoutButton" disabled>Cerrar sesión</button>
   </div>
 
   <div id="mensajeAutenticacion">Inicia sesión para poder añadir canciones.</div>
 
+  <!-- Título y lista de canciones -->
   <ul id="listaCanciones"></ul>
+  <h1>🎵 Canciones Sugeridas</h1>
 
   <script>
     const firebaseConfig = {
@@ -110,11 +111,17 @@
         mensaje.style.display = "none";
         loginButton.style.display = "none";
         logoutButton.style.display = "inline-block";
+        logoutButton.disabled = false;
+        input.disabled = false;
+        document.querySelector('button[onclick="agregarCancion()"]').disabled = false;
         cargarCanciones();
       } else {
         mensaje.style.display = "block";
         loginButton.style.display = "inline-block";
         logoutButton.style.display = "none";
+        logoutButton.disabled = true;
+        input.disabled = true;
+        document.querySelector('button[onclick="agregarCancion()"]').disabled = true;
         listaCanciones.innerHTML = "";
       }
     });
