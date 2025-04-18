@@ -52,6 +52,14 @@
         const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
 
+        // Comprobar si el usuario está autenticado
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                // Si el usuario no está autenticado, redirigir a login
+                window.location.href = "login.html";
+            }
+        });
+
         // Botón de logout
         const logoutButton = document.getElementById('logoutButton');
 
