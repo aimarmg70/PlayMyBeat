@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlayMyBeat - Sugerir Canciones</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0A0F2C;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #6C63FF;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 70%;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #6C63FF, #403F7E);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #1C1F3C;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 6px;
+        }
+    </style>
+    <!-- Firebase App (core) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <!-- Firebase Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+</head>
+<body>
+    <h1>🎵 Sugerir Canción</h1>
+
+    <!-- Input para el nombre de la canción -->
+    <input type="text" id="songInput" placeholder="Escribe el nombre de la canción..." disabled />
+
+    <!-- Botón para cerrar sesión -->
+    <button onclick="signOutUser()">Cerrar sesión</button>
+
+    <h2>Canciones sugeridas:</h2>
+    <ul id="songList"></ul>
+
+    <script type="module">
+        // Configuración de Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCT372VK2yOnSyQ3X2hYN6FBy5zKMaZ3BQ",
+            authDomain: "playmebeat.firebaseapp.com",
+            databaseURL: "https://playmebeat-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "playmebeat",
+            storageBucket: "playmebeat.firebasestorage.app",
+            messagingSenderId: "1041226968074",
+            appId: "1:1041226968074:web:feb6cce1653b215efa03f3",
+            measurementId: "G-H8YHSXVGLB"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // Google sign-in provider
+        const googleProvider = new GoogleAuthProvider();
+
+        // Iniciar sesión con Google de forma automática
+        function signInWithGoogle() {
+            signInWithPopup(auth, googleProvider)
+                .then((result) => {
+                    console.log("Usuario autenticado:", result.user);
+                    // Aquí puede proceder con la escritura en Firebase
+                })
+                .catch((error) => {
+                    console.error("Error en el login con Google:", error);
+                });
+        }
+
+        // Cerrar sesión
+        function signOutUser() {
+            signOut(auth)
+                .then(() => {
+                    console.log("Usuario desautenticado");
+                    // Deshabilitar el input cuando no hay sesión activa
+                    document.getElementById("songInput").disabled = true;
+                })
+                .catch((error) => {
+                    console.error("Error al cerrar sesión:", error);
+                });
+        }
+
+        // Verificar si el usuario está autenticado
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("Usuario conectado:", user);
+                document.getElementById("songInput").disabled = false;
+            } else {
+                console.log("Usuario desconectado");
+                document.getElementById("songInput").disabled = true;
+                // Intentar iniciar sesión automáticamente al acceder a la página
+                signInWithGoogle();
+            }
+        });
+
+        // Función para añadir canción
+        function addSong() {
+            const input = document.getElementById('songInput');
+            const songName = input.value.trim();
+            if (songName === '') return;
+
+            const cancionesRef = ref(db, 'canciones');
+            const nuevaCancion = push(cancionesRef);
+            set(nuevaCancion, { nombre: songName })
+                .then(() => {
+                    input.value = '';  // Limpiar el input después de agregar la canción
+                })
+                .catch((error) => {
+                    console.error("Error al agregar la canción:", error);
+                });
+        }
+
+        // Mostrar las canciones en la lista
+        const songList = document.getElementById('songList');
+        onValue(ref(db, 'canciones'), (snapshot) => {
+            songList.innerHTML = '';  // Limpiar la lista antes de mostrar nuevas canciones
+            snapshot.forEach((childSnapshot) => {
+                const song = childSnapshot.val();
+                const li = document.createElement('li');
+                li.textContent = song.nombre;
+                songList.appendChild(li);
+            });
+        });
+    </script>
+</body>
+</html>
