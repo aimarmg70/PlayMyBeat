@@ -28,13 +28,10 @@
             font-size: 16px;
         }
     </style>
-</head>
-
-<body>
-    <h1>🎵 Canciones Sugeridas</h1>
-
-    <button id="logoutButton">Cerrar sesión</button>
-
+    <!-- Firebase App (core) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
     <script>
         // Configuración de Firebase
         const firebaseConfig = {
@@ -55,11 +52,19 @@
         // Comprobar si el usuario está autenticado
         auth.onAuthStateChanged((user) => {
             if (!user) {
-                // Si el usuario no está autenticado, redirigir a login
+                // Si no está autenticado, redirigir a login
                 window.location.href = "login.html";
             }
         });
+    </script>
+</head>
 
+<body>
+    <h1>🎵 Canciones Sugeridas</h1>
+
+    <button id="logoutButton">Cerrar sesión</button>
+
+    <script>
         // Botón de logout
         const logoutButton = document.getElementById('logoutButton');
 
