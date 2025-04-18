@@ -2,113 +2,110 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlayMyBeat - Canciones</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #0A0F2C;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PlayMyBeat - Canciones</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0A0F2C;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
 
-        h1 {
-            color: #6C63FF;
-        }
+    h1 {
+      color: #6C63FF;
+    }
 
-        button {
-            padding: 10px 20px;
-            background: linear-gradient(45deg, #6C63FF, #403F7E);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-        }
+    button {
+      padding: 10px 20px;
+      background: linear-gradient(45deg, #6C63FF, #403F7E);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px;
+    }
 
-        #authText {
-            margin: 20px 0;
-            font-size: 18px;
-            color: #FF0000;
-        }
-    </style>
-    <!-- Firebase App (core) -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <!-- Firebase Authentication -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-    <script>
-        // Configuración de Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyCT372VK2yOnSyQ3X2hYN6FBy5zKMaZ3BQ",
-            authDomain: "playmebeat.firebaseapp.com",
-            databaseURL: "https://playmebeat-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "playmebeat",
-            storageBucket: "playmebeat.firebasestorage.app",
-            messagingSenderId: "1041226968074",
-            appId: "1:1041226968074:web:feb6cce1653b215efa03f3",
-            measurementId: "G-H8YHSXVGLB"
-        };
+    #authText {
+      margin: 20px 0;
+      font-size: 18px;
+      color: #FF8080;
+    }
+  </style>
 
-        // Inicializar Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-
-        // Comprobar si el usuario está autenticado
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                // Si ya está autenticado, mostrar el contenido principal y ocultar el texto y el botón de login
-                document.getElementById('authText').style.display = 'none';
-                document.getElementById('loginButton').style.display = 'none';
-                document.getElementById('logoutButton').style.display = 'block';
-            } else {
-                // Si no está autenticado, mostrar el texto y el botón de login
-                document.getElementById('authText').style.display = 'block';
-                document.getElementById('loginButton').style.display = 'block';
-                document.getElementById('logoutButton').style.display = 'none';
-            }
-        });
-
-        // Función para iniciar sesión con Google
-        function login() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider)
-                .then((result) => {
-                    // Usuario ha iniciado sesión
-                    console.log('Usuario autenticado: ', result.user);
-                })
-                .catch((error) => {
-                    console.log(error.message);
-                });
-        }
-
-        // Función para cerrar sesión
-        function logout() {
-            auth.signOut().then(() => {
-                console.log('Usuario desconectado');
-            }).catch((error) => {
-                console.log(error.message);
-            });
-        }
-    </script>
+  <!-- Firebase compat (para usar auth con sintaxis antigua) -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 </head>
 
 <body>
-    <h1>🎵 Canciones Sugeridas</h1>
+  <h1>🎵 Canciones Sugeridas</h1>
 
-    <!-- Texto que indica que hay que autenticarse -->
-    <p id="authText">Para usar la web, debes iniciar sesión con Google.</p>
+  <p id="authText">Para usar la web, debes iniciar sesión con Google.</p>
 
-    <!-- Botón de login, visible solo si el usuario no está autenticado -->
-    <button id="loginButton" onclick="login()">Iniciar sesión con Google</button>
+  <button id="loginButton">Iniciar sesión con Google</button>
+  <button id="logoutButton" style="display: none;">Cerrar sesión</button>
 
-    <!-- Botón de logout, visible solo si el usuario está autenticado -->
-    <button id="logoutButton" onclick="logout()" style="display: none;">Cerrar sesión</button>
+  <script>
+    // Configuración Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCT372VK2yOnSyQ3X2hYN6FBy5zKMaZ3BQ",
+      authDomain: "playmebeat.firebaseapp.com",
+      databaseURL: "https://playmebeat-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "playmebeat",
+      storageBucket: "playmebeat.firebasestorage.app",
+      messagingSenderId: "1041226968074",
+      appId: "1:1041226968074:web:feb6cce1653b215efa03f3",
+      measurementId: "G-H8YHSXVGLB"
+    };
 
-    <script>
-        // Aquí podrías agregar más lógica para mostrar las canciones o cualquier otro contenido
-    </script>
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    const loginButton = document.getElementById('loginButton');
+    const logoutButton = document.getElementById('logoutButton');
+    const authText = document.getElementById('authText');
+
+    // Login con Google
+    loginButton.addEventListener('click', () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          console.log("Sesión iniciada con:", result.user.displayName);
+        })
+        .catch((error) => {
+          console.error("Error en login:", error.message);
+        });
+    });
+
+    // Logout
+    logoutButton.addEventListener('click', () => {
+      auth.signOut()
+        .then(() => {
+          console.log("Sesión cerrada");
+        })
+        .catch((error) => {
+          console.error("Error al cerrar sesión:", error.message);
+        });
+    });
+
+    // Escuchar cambios de sesión
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        loginButton.style.display = "none";
+        logoutButton.style.display = "inline-block";
+        authText.style.display = "none";
+      } else {
+        loginButton.style.display = "inline-block";
+        logoutButton.style.display = "none";
+        authText.style.display = "block";
+      }
+    });
+  </script>
 </body>
 
 </html>
