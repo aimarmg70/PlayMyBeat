@@ -78,8 +78,10 @@
 
   <div id="mensajeAutenticacion">Inicia sesión para poder añadir canciones.</div>
 
-  <!-- Título y lista de canciones -->
+  <!-- Lista de canciones -->
   <ul id="listaCanciones"></ul>
+
+  <!-- Título de canciones sugeridas, ahora debajo de todo -->
   <h1>🎵 Canciones Sugeridas</h1>
 
   <script>
@@ -108,21 +110,21 @@
     auth.onAuthStateChanged((user) => {
       usuarioAutenticado = user;
       if (user) {
-        mensaje.style.display = "none";
-        loginButton.style.display = "none";
-        logoutButton.style.display = "inline-block";
-        logoutButton.disabled = false;
-        input.disabled = false;
-        document.querySelector('button[onclick="agregarCancion()"]').disabled = false;
-        cargarCanciones();
+        mensaje.style.display = "none"; // Ocultar mensaje de inicio de sesión
+        loginButton.style.display = "none"; // Ocultar botón de login
+        logoutButton.style.display = "inline-block"; // Mostrar botón de logout
+        logoutButton.disabled = false; // Habilitar botón de logout
+        input.disabled = false; // Habilitar campo de texto
+        document.querySelector('button[onclick="agregarCancion()"]').disabled = false; // Habilitar botón añadir canción
+        cargarCanciones(); // Cargar canciones desde Firebase
       } else {
-        mensaje.style.display = "block";
-        loginButton.style.display = "inline-block";
-        logoutButton.style.display = "none";
-        logoutButton.disabled = true;
-        input.disabled = true;
-        document.querySelector('button[onclick="agregarCancion()"]').disabled = true;
-        listaCanciones.innerHTML = "";
+        mensaje.style.display = "block"; // Mostrar mensaje de inicio de sesión
+        loginButton.style.display = "inline-block"; // Mostrar botón de login
+        logoutButton.style.display = "none"; // Ocultar botón de logout
+        logoutButton.disabled = true; // Deshabilitar botón de logout
+        input.disabled = true; // Deshabilitar campo de texto
+        document.querySelector('button[onclick="agregarCancion()"]').disabled = true; // Deshabilitar botón añadir canción
+        listaCanciones.innerHTML = ""; // Limpiar lista de canciones
       }
     });
 
