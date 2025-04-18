@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PlayMyBeat - Canciones</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       background-color: #0A0F2C;
       color: white;
-      padding: 20px;
       text-align: center;
+      padding: 20px;
     }
 
     h1 {
@@ -32,9 +32,9 @@
       padding: 10px;
       border-radius: 5px;
       border: none;
-      margin-right: 10px;
       width: 60%;
       max-width: 300px;
+      margin-right: 10px;
     }
 
     ul {
@@ -53,20 +53,17 @@
     }
   </style>
 
-  <!-- Firebase SDK -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 </head>
-
 <body>
   <h1>🎵 Canciones Sugeridas</h1>
 
-  <p id="authMessage">Por favor, inicia sesión con Google para añadir canciones.</p>
-  <button id="loginButton">Iniciar sesión con Google</button>
-  <button id="logoutButton" style="display: none;">Cerrar sesión</button>
+  <button id="logoutButton">Cerrar sesión</button>
 
-  <div id="formulario" style="display: none;">
+  <div id="formulario">
     <input type="text" id="cancionInput" placeholder="Escribe una canción" />
     <button onclick="agregarCancion()">Agregar Canción</button>
   </div>
@@ -79,55 +76,33 @@
       authDomain: "playmebeat.firebaseapp.com",
       databaseURL: "https://playmebeat-default-rtdb.europe-west1.firebasedatabase.app",
       projectId: "playmebeat",
-      storageBucket: "playmebeat.firebasestorage.app",
-      messagingSenderId: "1041226968074",
-      appId: "1:1041226968074:web:feb6cce1653b215efa03f3",
-      measurementId: "G-H8YHSXVGLB"
+      appId: "1:1041226968074:web:feb6cce1653b215efa03f3"
     };
 
     const app = firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
 
-    const loginButton = document.getElementById('loginButton');
-    const logoutButton = document.getElementById('logoutButton');
-    const authMessage = document.getElementById('authMessage');
-    const formulario = document.getElementById('formulario');
-    const listaCanciones = document.getElementById('listaCanciones');
-
-    loginButton.addEventListener('click', () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).catch((error) => {
-        console.error("Error al iniciar sesión:", error);
-      });
-    });
-
-    logoutButton.addEventListener('click', () => {
-      auth.signOut();
-    });
+    const logoutButton = document.getElementById("logoutButton");
+    const listaCanciones = document.getElementById("listaCanciones");
 
     auth.onAuthStateChanged((user) => {
-      if (user) {
-        loginButton.style.display = "none";
-        logoutButton.style.display = "inline-block";
-        authMessage.style.display = "none";
-        formulario.style.display = "block";
-        cargarCanciones();
+      if (!user) {
+        window.location.href = "login.html";
       } else {
-        loginButton.style.display = "inline-block";
-        logoutButton.style.display = "none";
-        authMessage.style.display = "block";
-        formulario.style.display = "none";
-        listaCanciones.innerHTML = "";
+        cargarCanciones();
       }
     });
 
+    logoutButton.addEventListener("click", () => {
+      auth.signOut();
+    });
+
     function agregarCancion() {
-      const input = document.getElementById('cancionInput');
+      const input = document.getElementById("cancionInput");
       const nuevaCancion = input.value.trim();
       if (nuevaCancion !== "") {
-        const nuevaRef = db.ref("canciones").push();
-        nuevaRef.set({ nombre: nuevaCancion });
+        db.ref("canciones").push({ nombre: nuevaCancion });
         input.value = "";
       }
     }
@@ -135,8 +110,8 @@
     function cargarCanciones() {
       db.ref("canciones").on("value", (snapshot) => {
         listaCanciones.innerHTML = "";
-        snapshot.forEach((childSnapshot) => {
-          const nombre = childSnapshot.val().nombre;
+        snapshot.forEach((child) => {
+          const nombre = child.val().nombre;
           const li = document.createElement("li");
           li.textContent = nombre;
           listaCanciones.appendChild(li);
