@@ -51,6 +51,11 @@
       width: 80%;
       max-width: 400px;
     }
+
+    #formulario {
+      display: none; /* oculto por defecto */
+      margin-top: 20px;
+    }
   </style>
 
   <!-- Firebase -->
@@ -84,18 +89,23 @@
     const db = firebase.database();
 
     const logoutButton = document.getElementById("logoutButton");
+    const formulario = document.getElementById("formulario");
     const listaCanciones = document.getElementById("listaCanciones");
 
     auth.onAuthStateChanged((user) => {
       if (!user) {
         window.location.href = "login.html";
       } else {
+        // Mostrar el formulario solo si el usuario está autenticado
+        formulario.style.display = "block";
         cargarCanciones();
       }
     });
 
     logoutButton.addEventListener("click", () => {
-      auth.signOut();
+      auth.signOut().then(() => {
+        window.location.href = "login.html";
+      });
     });
 
     function agregarCancion() {
