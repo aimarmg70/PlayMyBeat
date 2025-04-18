@@ -55,7 +55,7 @@
     #mensajeAutenticacion {
       margin-top: 20px;
       font-style: italic;
-      color: red; /* Cambié a rojo */
+      color: red;
     }
   </style>
 
@@ -105,6 +105,21 @@
 
     let usuarioAutenticado = null;
 
+    // 👉 Deshabilita todo al inicio excepto el botón de login
+    function deshabilitarInterfaz() {
+      const botones = document.querySelectorAll("button");
+      const inputs = document.querySelectorAll("input, textarea, select");
+
+      botones.forEach((btn) => {
+        if (btn.id !== "loginButton") btn.disabled = true;
+      });
+
+      inputs.forEach((el) => el.disabled = true);
+    }
+
+    // Se ejecuta al cargar la página
+    window.onload = deshabilitarInterfaz;
+
     auth.onAuthStateChanged((user) => {
       usuarioAutenticado = user;
       if (user) {
@@ -123,6 +138,7 @@
         input.disabled = true;
         document.querySelector('button[onclick="agregarCancion()"]').disabled = true;
         listaCanciones.innerHTML = "";
+        deshabilitarInterfaz(); // aseguramos estado correcto
       }
     });
 
